@@ -1,4 +1,4 @@
-.PHONY: buildx buildx-build push
+.PHONY: buildx buildx-build push run-test build test-uploader
 
 # Multi-platform Docker build commands
 # Setup Buildx builder
