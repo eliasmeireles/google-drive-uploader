@@ -1,4 +1,4 @@
-.PHONY: buildx buildx-build push run-test build test-uploader
+.PHONY: buildx buildx-build push run-test build test-uploader build-docker-test test-docker debug-docker
 
 # Multi-platform Docker build commands
 # Setup Buildx builder
@@ -23,14 +23,27 @@ test-uploader:
 	read -p "Enter the root folder ID: " ROOT_FOLDER_ID; \
 	go run ./cmd/uploader --smart-organize --root-folder-id "$$ROOT_FOLDER_ID" --folder-name GDU_CLI_TEST ./test/myFakeDatabase_backup_20251224_084205.txt
 
-test-docker:
+build-docker-test:
+	@echo "Building docker image for testing..."
+	@docker build -f Dockerfile.test -t google-driver-uploader:test .
+
+test-docker: build-docker-test
 	@echo "Testing docker image with smart organization"; \
 	read -p "Enter the root folder ID: " ROOT_FOLDER_ID; \
 	docker run --rm \
-		-v /etc/google-driver-uploader:/etc/google-driver-uploader:ro \
+		-v $(PWD)/.out:/etc/google-driver-uploader \
 		-v $(PWD)/test:/data \
-		ghcr.io/eliasmeireles/cli/google-driver-uploader:latest \
+		google-driver-uploader:test \
 		--smart-organize \
 		--root-folder-id "$$ROOT_FOLDER_ID" \
 		--folder-name GDU_CLI_TEST_DOCKER \
+		--token-path /etc/google-driver-uploader/token.json \
 		/data/myFakeDatabase_backup_20251224_084205.txt
+
+debug-docker: build-docker-test
+	@docker run --rm -it \
+		-v $(PWD)/.out:/etc/google-driver-uploader \
+		-v $(PWD)/test:/data \
+		--entrypoint sh \
+		google-driver-uploader:test
+

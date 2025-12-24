@@ -31,6 +31,15 @@ func tokenFromFile(file string) (*oauth2.Token, *TokenFile, error) {
 	}
 	defer f.Close()
 
+	// Check if it's a directory
+	info, err := f.Stat()
+	if err != nil {
+		return nil, nil, err
+	}
+	if info.IsDir() {
+		return nil, nil, fmt.Errorf("token path '%s' is a directory, expected a file", file)
+	}
+
 	// Try to read as TokenFile first (enhanced format)
 	tokenFile := &TokenFile{}
 	err = json.NewDecoder(f).Decode(tokenFile)
