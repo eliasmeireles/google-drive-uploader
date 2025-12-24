@@ -27,6 +27,11 @@ build-docker-test:
 	@echo "Building docker image for testing..."
 	@docker build -f Dockerfile.test -t google-drive-uploader:test .
 
+token-gen:
+	@echo "Generating token..."
+	@read -p "Enter the secret path: " SECRET_PATH; \
+	 go run ./cmd/uploader --token-gen --client-secret $$SECRET_PATH
+
 test-docker:
 	@echo "Testing docker image with smart organization"; \
 	read -p "Enter the root folder ID: " ROOT_FOLDER_ID; \
@@ -34,6 +39,20 @@ test-docker:
 		-v $(PWD)/.out:/etc/google-drive-uploader \
 		-v $(PWD)/test:/data \
 		ghcr.io/eliasmeireles/cli/google-drive-uploader:latest \
+		--smart-organize \
+		--root-folder-id "$$ROOT_FOLDER_ID" \
+		--folder-name GDU_CLI_TEST_DOCKER \
+		--token-path /etc/google-drive-uploader/token.json \
+		/data/myFakeDatabase_backup_20251224_084205.txt
+
+
+test-docker-build: build-docker-test
+	@echo "Testing docker image with smart organization"; \
+	read -p "Enter the root folder ID: " ROOT_FOLDER_ID; \
+	docker run --rm \
+		-v $(PWD)/.out:/etc/google-drive-uploader \
+		-v $(PWD)/test:/data \
+		google-drive-uploader:test \
 		--smart-organize \
 		--root-folder-id "$$ROOT_FOLDER_ID" \
 		--folder-name GDU_CLI_TEST_DOCKER \
