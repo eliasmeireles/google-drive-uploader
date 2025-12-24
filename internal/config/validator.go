@@ -8,22 +8,21 @@ import (
 
 const (
 	defaultConfigDir       = "/etc/google-drive-uploader"
-	defaultCredentialsFile = "client-secret.json"
 	defaultTokenFile       = "token.json"
+	defaultCredentialsFile = "client-secret.json"
+)
+
+var (
+	DefaultTokenFilePath        = filepath.Join(defaultConfigDir, defaultTokenFile)
+	DefaultCredentialsFilesPath = filepath.Join(defaultConfigDir, defaultCredentialsFile)
 )
 
 // Validate checks the configuration for errors and sets defaults
 func (c *Config) Validate(args []string) error {
 	// Handle token generation mode validation
 	if c.TokenGen {
-		if c.ClientSecret == "" {
-			// Check default location
-			defaultCreds := filepath.Join(defaultConfigDir, defaultCredentialsFile)
-			if _, err := os.Stat(defaultCreds); err == nil {
-				c.ClientSecret = defaultCreds
-			} else {
-				return fmt.Errorf("--client-secret is required for token generation")
-			}
+		if _, err := os.Stat(DefaultCredentialsFilesPath); err != nil {
+			return err
 		}
 		return nil
 	}
@@ -37,31 +36,10 @@ func (c *Config) Validate(args []string) error {
 		return fmt.Errorf("at least one file or --workdir is required (unless using --cleanup mode)")
 	}
 
-	// Handle default token path if not explicitly provided and local token file doesn't exist
-	if c.TokenPath == ".out/token.json" {
-		if _, err := os.Stat(".out/token.json"); os.IsNotExist(err) {
-			defaultToken := filepath.Join(defaultConfigDir, defaultTokenFile)
-			if _, err := os.Stat(defaultToken); err == nil {
-				c.TokenPath = defaultToken
-			}
-		}
-	}
-
-	// Check if we have a valid token file
-	hasValidToken := false
-	if _, err := os.Stat(c.TokenPath); err == nil {
-		hasValidToken = true
-	}
-
 	// Only require client-secret if we don't have a token and we are NOT in token-gen mode (already checked above)
-	if !c.TokenGen && c.ClientSecret == "" {
-		defaultCreds := filepath.Join(defaultConfigDir, defaultCredentialsFile)
-		if _, err := os.Stat(defaultCreds); err == nil {
-			c.ClientSecret = defaultCreds
-		} else if !hasValidToken {
-			// Check if token is self-sufficient (we can't easily check inside without parsing,
-			// but authenticator will handle it. If it fails, it fails.)
-			// We'll let authenticator try.
+	if !c.TokenGen {
+		if _, err := os.Stat(c.TokenPath); err != nil {
+			return err
 		}
 	}
 

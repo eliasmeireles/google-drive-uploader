@@ -116,10 +116,10 @@ func (s *savingTokenSource) Token() (*oauth2.Token, error) {
 	// or just check if the expiry or access token is different from what we might have.
 	// But since we want to be sure it's always up to date:
 
-	current, _, _ := tokenFromFile(s.path)
+	current, tokenData, _ := tokenFromFile(s.path)
 	if current == nil || current.AccessToken != tok.AccessToken || !current.Expiry.Equal(tok.Expiry) {
 		fmt.Printf("Token refreshed, saving to %s\n", s.path)
-		saveToken(s.path, tok, s.config)
+		saveToken(s.path, tokenData.Refresh(tok))
 	}
 
 	return tok, nil

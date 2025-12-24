@@ -22,6 +22,18 @@ type TokenFile struct {
 	ClientSecret string `json:"client_secret,omitempty"`
 }
 
+func NewTokenFile(ClientID, ClientSecret string) *TokenFile {
+	return &TokenFile{ClientID: ClientID, ClientSecret: ClientSecret}
+}
+
+func (t *TokenFile) Refresh(token *oauth2.Token) *TokenFile {
+	t.AccessToken = token.AccessToken
+	t.TokenType = token.TokenType
+	t.RefreshToken = token.RefreshToken
+	t.Expiry = token.Expiry
+	return t
+}
+
 // Retrieves a token from a local file.
 // Supports both enhanced TokenFile format and standard oauth2.Token format
 func tokenFromFile(file string) (*oauth2.Token, *TokenFile, error) {
@@ -59,7 +71,7 @@ func tokenFromFile(file string) (*oauth2.Token, *TokenFile, error) {
 }
 
 // Saves a token to a file path with optional OAuth config for enhanced format
-func saveToken(path string, token *oauth2.Token, config *oauth2.Config) {
+func saveToken(path string, token *TokenFile) {
 	fmt.Printf("Saving credential file to: %s\n", path)
 	// Ensure directory exists
 	if dir := filepath.Dir(path); dir != "" {
@@ -76,19 +88,5 @@ func saveToken(path string, token *oauth2.Token, config *oauth2.Config) {
 	}
 	defer f.Close()
 
-	// Create enhanced token file with client credentials if config is provided
-	tokenFile := TokenFile{
-		AccessToken:  token.AccessToken,
-		TokenType:    token.TokenType,
-		RefreshToken: token.RefreshToken,
-		Expiry:       token.Expiry,
-	}
-
-	// Extract client credentials from config if available
-	if config != nil {
-		tokenFile.ClientID = config.ClientID
-		tokenFile.ClientSecret = config.ClientSecret
-	}
-
-	json.NewEncoder(f).Encode(tokenFile)
+	json.NewEncoder(f).Encode(token)
 }

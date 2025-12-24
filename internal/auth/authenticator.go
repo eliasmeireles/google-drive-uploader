@@ -33,7 +33,7 @@ func (a *Authenticator) GetClient(ctx context.Context, scope ...string) (*http.C
 
 	// Check if we have a valid token first
 	tok, tokenFile, err := tokenFromFile(a.Config.TokenPath)
-	if err != nil {
+	if err != nil && !a.Config.TokenGen {
 		return nil, err
 	}
 
@@ -60,7 +60,7 @@ func (a *Authenticator) GetClient(ctx context.Context, scope ...string) (*http.C
 
 	b, err := os.ReadFile(a.Config.ClientSecret)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read client secret file: %v", err)
+		return nil, fmt.Errorf("unable to read client secret file: %v\nPlease provide a valid client secret file by using --client-secret", err)
 	}
 
 	config, err := google.ConfigFromJSON(b, scope...)
@@ -79,11 +79,12 @@ func (a *Authenticator) getClient(ctx context.Context, config *oauth2.Config, ex
 	if existingToken != nil {
 		tok = existingToken
 	} else {
-		t, _, err := tokenFromFile(a.Config.TokenPath)
+		t, tokenData, err := tokenFromFile(a.Config.TokenPath)
 		if err != nil {
 			fmt.Printf("No token found at %s, starting authorization flow...\n", a.Config.TokenPath)
 			tok = getTokenFromWeb(config)
-			saveToken(a.Config.TokenPath, tok, config)
+			tokenData = NewTokenFile(config.ClientID, config.ClientSecret)
+			saveToken(a.Config.TokenPath, tokenData.Refresh(tok))
 		} else {
 			tok = t
 		}
@@ -103,7 +104,8 @@ func (a *Authenticator) getClient(ctx context.Context, config *oauth2.Config, ex
 	if err != nil {
 		fmt.Printf("Failed to refresh token: %v. Requesting new authorization...\n", err)
 		tok = getTokenFromWeb(config)
-		saveToken(a.Config.TokenPath, tok, config)
+		tokenData := NewTokenFile(config.ClientID, config.ClientSecret)
+		saveToken(a.Config.TokenPath, tokenData.Refresh(tok))
 		// Update the wrapped source with the new token
 		ts = config.TokenSource(ctx, tok)
 		wrappedTs.source = ts

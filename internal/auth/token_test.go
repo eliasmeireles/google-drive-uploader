@@ -100,7 +100,7 @@ func TestSaveToken(t *testing.T) {
 	}
 
 	// Save with config (enhanced)
-	saveToken(tokenPath, token, config)
+	saveToken(tokenPath, token, nil, config)
 
 	// Read back
 	_, tokenFile, err := tokenFromFile(tokenPath)

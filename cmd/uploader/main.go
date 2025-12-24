@@ -28,11 +28,11 @@ Supports large files, automatic folder organization, and resumable uploads.`,
 	}
 
 	// Flags
-	rootCmd.Flags().StringVar(&cfg.ClientSecret, "client-secret", "", "Path to the OAuth 2.0 client secret file (optional if exists in /etc/google-drive-uploader/ or if token.json has embedded credentials)")
+	rootCmd.Flags().StringVar(&cfg.ClientSecret, "client-secret", config.DefaultCredentialsFilesPath, "Path to the OAuth 2.0 client secret file. Required only for generates a new token (defaults to /etc/google-drive-uploader/client-secret.json)")
+	rootCmd.Flags().StringVar(&cfg.TokenPath, "token-path", config.DefaultTokenFilePath, "Path to the OAuth 2.0 token file (defaults to /etc/google-drive-uploader/token.json)")
 	rootCmd.Flags().StringVar(&cfg.RootFolderID, "root-folder-id", "", "ID of the root folder to save the file (required unless --token-gen is used)")
 	rootCmd.Flags().StringVar(&cfg.FileName, "file-name", "", "Name of the file to save in Google Drive (optional, defaults to source filename). Note: Applied to ALL files if multiple.")
 	rootCmd.Flags().StringVar(&cfg.FolderName, "folder-name", "", "Name of the sub-folder to save the file in (optional)")
-	rootCmd.Flags().StringVar(&cfg.TokenPath, "token-path", ".out/token.json", "Path to the OAuth 2.0 token file (defaults to ./.out/token.json or /etc/google-drive-uploader/token.json)")
 	rootCmd.Flags().BoolVar(&cfg.SmartOrganize, "smart-organize", false, "Enable smart organization based on filename")
 	rootCmd.Flags().StringVar(&cfg.WorkDir, "workdir", "", "Path to the directory containing files to upload")
 	rootCmd.Flags().BoolVar(&cfg.DeleteOnSuccess, "delete-on-success", false, "Delete the file after successful upload")
