@@ -20,7 +20,7 @@ automatic directory management.
 
 ```bash
 # Clone the repository
-git clone https://github.com/eliasferreira/google-drive-uploader.git
+git clone https://github.com/eliasmeireles/google-drive-uploader.git
 cd google-drive-uploader
 
 # Build the binary
