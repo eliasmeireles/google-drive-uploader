@@ -7,11 +7,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/eliasferreira/google-driver-uploader/internal/auth"
-	"github.com/eliasferreira/google-driver-uploader/internal/cleanup"
-	"github.com/eliasferreira/google-driver-uploader/internal/config"
-	"github.com/eliasferreira/google-driver-uploader/internal/driveclient"
-	"github.com/eliasferreira/google-driver-uploader/internal/parser"
+	"github.com/eliasferreira/google-drive-uploader/internal/auth"
+	"github.com/eliasferreira/google-drive-uploader/internal/cleanup"
+	"github.com/eliasferreira/google-drive-uploader/internal/config"
+	"github.com/eliasferreira/google-drive-uploader/internal/driveclient"
+	"github.com/eliasferreira/google-drive-uploader/internal/parser"
 )
 
 // Run executes the main application using the provided configuration

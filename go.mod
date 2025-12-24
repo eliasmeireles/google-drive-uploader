@@ -1,4 +1,4 @@
-module github.com/eliasferreira/google-driver-uploader
+module github.com/eliasferreira/google-drive-uploader
 
 go 1.25.3
 

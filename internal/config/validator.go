@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	defaultConfigDir       = "/etc/google-driver-uploader"
+	defaultConfigDir       = "/etc/google-drive-uploader"
 	defaultCredentialsFile = "api-key.json"
 	defaultTokenFile       = "token.json"
 )

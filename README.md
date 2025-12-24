@@ -19,8 +19,8 @@ A high-performance CLI tool written in Go to upload files to Google Drive. It su
 
 ```bash
 # Clone the repository
-git clone https://github.com/eliasferreira/google-driver-uploader.git
-cd google-driver-uploader
+git clone https://github.com/eliasferreira/google-drive-uploader.git
+cd google-drive-uploader
 
 # Build the binary
 go build -o uploader ./cmd/uploader
@@ -134,8 +134,8 @@ You can upload all files in a directory using the `--workdir` flag.
 
 ### Automation & Default Paths
 The tool looks for configuration in default paths, making it ideal for Docker and Kubernetes:
-- **Token**: `/etc/google-driver-uploader/token.json` (also checks current directory)
-- **Credentials**: `/etc/google-driver-uploader/api-key.json` (Optional: Only needed if you need to regenerate a token)
+- **Token**: `/etc/google-drive-uploader/token.json` (also checks current directory)
+- **Credentials**: `/etc/google-drive-uploader/api-key.json` (Optional: Only needed if you need to regenerate a token)
 
 > [!NOTE]
 > For automated environments (Docker, Kubernetes), you only need to provide the `token.json` file. The `api-key.json` is **NOT** required for uploads if you used `--token-gen` to create your token.
@@ -174,7 +174,7 @@ spec:
         spec:
           containers:
           - name: uploader
-            image: ghcr.io/eliasmeireles/cli/google-driver-uploader:latest
+            image: ghcr.io/eliasmeireles/cli/google-drive-uploader:latest
             args:
             - --workdir
             - /backups
@@ -186,7 +186,7 @@ spec:
             - --delete-on-success
             volumeMounts:
             - name: config
-              mountPath: /etc/google-driver-uploader
+              mountPath: /etc/google-drive-uploader
               readOnly: true
           volumes:
           - name: config
@@ -202,16 +202,16 @@ spec:
 You can also run the uploader directly using Docker. This is useful for testing or running in non-Kubernetes environments.
 
 **Prerequisites:**
-1. You have a valid `token.json` in `/etc/google-driver-uploader/` on your host machine.
+1. You have a valid `token.json` in `/etc/google-drive-uploader/` on your host machine.
 2. You have the files you want to upload in a local directory (e.g., `./data`).
 
 **Run the container:**
 
 ```bash
 docker run --rm \
-  -v /path/to/token.json:/etc/google-driver-uploader/token.json:ro \
+  -v /path/to/token.json:/etc/google-drive-uploader/token.json:ro \
   -v /path/to/data:/data \
-  ghcr.io/eliasmeireles/cli/google-driver-uploader:latest \
+  ghcr.io/eliasmeireles/cli/google-drive-uploader:latest \
   --workdir /data \
   --root-folder-id "YOUR_FOLDER_ID" \
   --smart-organize \
@@ -290,7 +290,7 @@ With `--keep 1`, only the most recent date folder in each group is kept. With `-
 | Flag | Description | Default |
 |------|-------------|---------|
 | `--root-folder-id` | ID of the Google Drive folder to save to. | **Required** |
-| `--client-secret` | Path to `api-key.json`. Optional if valid token exists. | `/etc/google-driver-uploader/api-key.json` |
+| `--client-secret` | Path to `api-key.json`. Optional if valid token exists. | `/etc/google-drive-uploader/api-key.json` |
 | `--token-path` | Path to the OAuth 2.0 token file. | `token.json` or `/etc/.../token.json` |
 | `--workdir` | Path to directory to upload all files from. | - |
 | `--smart-organize` | Enable automatic folder organization (`Service/Date/File`). | `false` |
