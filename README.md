@@ -210,11 +210,43 @@ spec:
             - name: config
               secret:
                 secretName: google-drive-uploader-config
+---
+# Cleanup cronjob example
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: google-drive-cleanup
+spec:
+  schedule: "0 4 * * *" # Every day at 4:00 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: uploader
+              image: ghcr.io/eliasmeireles/cli/google-drive-uploader:latest
+              args:
+                - --cleanup
+                - --keep
+                - "2"
+                - --match
+                - "yyyy-MM-dd"
+                - --root-folder-id
+                - "YOUR_FOLDER_ID_HERE"
+              volumeMounts:
+                - name: config
+                  mountPath: /etc/google-drive-uploader
+                  readOnly: true
+          volumes:
+            - name: config
+              secret:
+                secretName: google-drive-uploader-config
 ```
 
 > [!NOTE]
 > Make sure to create a secret named `google-drive-uploader-config` containing your `token.json`. No other files are
 > needed.
+
 
 ### Docker Usage
 
