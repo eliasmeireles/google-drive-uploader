@@ -283,6 +283,4 @@ With `--keep 1`, only the most recent date folder in each group is kept. With `-
 | `--keep` | Number of most recent date folders to keep (cleanup mode). | `1` |
 | `--match` | Date pattern to match folder names (e.g., `yyyy-MM-dd`, `yyyyMMdd`). | `yyyy-MM-dd` |
 
-## License
 
-MIT

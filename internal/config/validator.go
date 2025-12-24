@@ -37,9 +37,9 @@ func (c *Config) Validate(args []string) error {
 		return fmt.Errorf("at least one file or --workdir is required (unless using --cleanup mode)")
 	}
 
-	// Handle default token path if not explicitly provided and local token.json doesn't exist
-	if c.TokenPath == "token.json" {
-		if _, err := os.Stat("token.json"); os.IsNotExist(err) {
+	// Handle default token path if not explicitly provided and local token file doesn't exist
+	if c.TokenPath == ".out/token.json" {
+		if _, err := os.Stat(".out/token.json"); os.IsNotExist(err) {
 			defaultToken := filepath.Join(defaultConfigDir, defaultTokenFile)
 			if _, err := os.Stat(defaultToken); err == nil {
 				c.TokenPath = defaultToken

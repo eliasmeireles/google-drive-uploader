@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -51,6 +52,14 @@ func tokenFromFile(file string) (*oauth2.Token, *TokenFile, error) {
 // Saves a token to a file path with optional OAuth config for enhanced format
 func saveToken(path string, token *oauth2.Token, config *oauth2.Config) {
 	fmt.Printf("Saving credential file to: %s\n", path)
+	// Ensure directory exists
+	if dir := filepath.Dir(path); dir != "" {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			fmt.Printf("Unable to create directory for token: %v\n", err)
+			return
+		}
+	}
+
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		fmt.Printf("Unable to cache oauth token: %v", err)
