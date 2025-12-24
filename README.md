@@ -141,15 +141,15 @@ You can upload all files in a directory using the `--workdir` flag.
 
 ### Automation & Default Paths
 The tool looks for configuration in default paths, making it ideal for Docker and Kubernetes:
-- **Credentials**: `/etc/google-driver-uploader/api-key.json` (optional if token exists)
 - **Token**: `/etc/google-driver-uploader/token.json` (also checks current directory)
+- **Credentials**: `/etc/google-driver-uploader/api-key.json` (Optional: Only needed if you need to regenerate a token)
 
 > [!NOTE]
-> For automated environments (Docker, Kubernetes), you only need to provide the `token.json` file. The `api-key.json` is only required for initial authentication or token refresh.
+> For automated environments (Docker, Kubernetes), you only need to provide the `token.json` file. The `api-key.json` is **NOT** required for uploads if you used `--token-gen` to create your token.
 
 ### Kubernetes CronJob Example
 
-You can run this tool as a CronJob in Kubernetes to automate your backups.
+You can run this tool as a CronJob in Kubernetes to automate your backups. Since `token.json` is self-sufficient, the secret is very simple.
 
 ```yaml
 apiVersion: v1
@@ -158,26 +158,15 @@ metadata:
   name: google-drive-uploader-config
   namespace: default
 stringData:
-  api-key.json: |
-    {
-      "installed": {
-          "client_id": "<YOUR_CLIENT_ID>.apps.googleusercontent.com",
-          "project_id": "<YOUR_PROJECT_ID>",
-          "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-          "token_uri": "https://oauth2.googleapis.com/token",
-          "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-          "client_secret": "<YOUR_CLIENT_SECRET>",
-          "redirect_uris": [
-              "http://localhost"
-          ]
-      }
-    }
+  # The content of your generated token.json
   token.json: |
     {
       "access_token": "<YOUR_ACCESS_TOKEN>",
       "token_type": "Bearer",
       "refresh_token": "<YOUR_REFRESH_TOKEN>",
-      "expiry": "<YOUR_EXPIRY_DATE>"
+      "expiry": "<YOUR_EXPIRY_DATE>",
+      "client_id": "<YOUR_CLIENT_ID>",
+      "client_secret": "<YOUR_CLIENT_SECRET>"
     }
 ---
 apiVersion: batch/v1
@@ -192,7 +181,7 @@ spec:
         spec:
           containers:
           - name: uploader
-            image: ghcr.io/eliasmeireles/tools/google-driver-uploader:latest
+            image: ghcr.io/eliasmeireles/cli/google-driver-uploader:latest
             args:
             - --workdir
             - /backups
@@ -213,7 +202,7 @@ spec:
 ```
 
 > [!NOTE]
-> Make sure to create a secret named `google-drive-uploader-config` containing your `api-key.json` and `token.json`.
+> Make sure to create a secret named `google-drive-uploader-config` containing your `token.json`. No other files are needed.
 
 ### Smart Organization
 
@@ -282,7 +271,7 @@ With `--keep 1`, only the most recent date folder in each group is kept. With `-
 | Flag | Description | Default |
 |------|-------------|---------|
 | `--root-folder-id` | ID of the Google Drive folder to save to. | **Required** |
-| `--oauth-client-config` | Path to `api-key.json`. Optional if valid token exists. | `/etc/google-driver-uploader/api-key.json` |
+| `--client-secret` | Path to `api-key.json`. Optional if valid token exists. | `/etc/google-driver-uploader/api-key.json` |
 | `--token-path` | Path to the OAuth 2.0 token file. | `token.json` or `/etc/.../token.json` |
 | `--workdir` | Path to directory to upload all files from. | - |
 | `--smart-organize` | Enable automatic folder organization (`Service/Date/File`). | `false` |
