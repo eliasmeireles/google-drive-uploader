@@ -204,6 +204,32 @@ spec:
 > [!NOTE]
 > Make sure to create a secret named `google-drive-uploader-config` containing your `token.json`. No other files are needed.
 
+### Docker Usage
+
+You can also run the uploader directly using Docker. This is useful for testing or running in non-Kubernetes environments.
+
+**Prerequisites:**
+1. You have a valid `token.json` in `/etc/google-driver-uploader/` on your host machine.
+2. You have the files you want to upload in a local directory (e.g., `./data`).
+
+**Run the container:**
+
+```bash
+docker run --rm \
+  -v /etc/google-driver-uploader:/etc/google-driver-uploader:ro \
+  -v $(pwd)/data:/data \
+  ghcr.io/eliasmeireles/cli/google-driver-uploader:latest \
+  --workdir /data \
+  --root-folder-id "YOUR_FOLDER_ID" \
+  --smart-organize \
+  --delete-on-success
+```
+
+This command:
+- Mounts your configuration read-only (`:ro`).
+- Mounts your local data directory to `/data` in the container.
+- processing all files in `/data`.
+
 ### Smart Organization
 
 The `--smart-organize` flag enables automatic folder organization based on filename patterns. Files matching the pattern `[service]_backup_[date]_[time]` will be organized into `Service/Date/` folders.
@@ -282,5 +308,3 @@ With `--keep 1`, only the most recent date folder in each group is kept. With `-
 | `--cleanup` | Enable cleanup mode to remove old date-based folders. | `false` |
 | `--keep` | Number of most recent date folders to keep (cleanup mode). | `1` |
 | `--match` | Date pattern to match folder names (e.g., `yyyy-MM-dd`, `yyyyMMdd`). | `yyyy-MM-dd` |
-
-
