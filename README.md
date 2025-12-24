@@ -47,13 +47,6 @@ Before using the uploader, you need to obtain two files: `api-key.json` (OAuth c
      - Add your email to **Test users** if using External
    - For Application type, select **Desktop app**
    - Give it a name (e.g., "Google Drive Uploader")
-   - **IMPORTANT**: Add the following URIs to **Authorized redirect URIs**:
-     - `http://localhost:54321/callback`
-     - `http://localhost:54322/callback`
-     - `http://localhost:54323/callback`
-     - `http://localhost:54324/callback`
-     - `http://localhost:54325/callback`
-     - `http://localhost` (as fallback)
    - Click **Create**
 5. Download the credentials:
    - Click the download icon (⬇️) next to your newly created OAuth client
@@ -70,7 +63,7 @@ The `api-key.json` file should look like this:
     "token_uri": "https://oauth2.googleapis.com/token",
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
     "client_secret": "YOUR_CLIENT_SECRET",
-    "redirect_uris": ["http://localhost", "http://localhost:54321/callback"]
+    "redirect_uris": ["http://localhost"]
   }
 }
 ```
