@@ -16,7 +16,13 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o google-drive-uplo
 
 FROM alpine:latest
 
-LABEL maintainer="Elias Meireles Ferreira <https://eliasmeireles.com.br>"
+LABEL org.opencontainers.image.title="Google Drive Uploader"
+LABEL org.opencontainers.image.description="Google Drive Uploader"
+LABEL org.opencontainers.image.version="0.0.1"
+LABEL org.opencontainers.image.authors="Elias Ferreira <https://github.com/eliasmeireles>"
+LABEL org.opencontainers.image.source="https://github.com/eliasmeireles/google-drive-uploader"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL maintainer="Elias Ferreira <https://eliasmeireles.com.br>"
 
 RUN apk --no-cache add ca-certificates
 
