@@ -247,7 +247,6 @@ spec:
 > Make sure to create a secret named `google-drive-uploader-config` containing your `token.json`. No other files are
 > needed.
 
-
 ### Docker Usage
 
 You can also run the uploader directly using Docker. This is useful for testing or running in non-Kubernetes
@@ -347,17 +346,17 @@ and so on.
 
 ### Flags
 
-| Flag                  | Description                                                          | Default                                                                    |
-|-----------------------|----------------------------------------------------------------------|----------------------------------------------------------------------------|
-| `--root-folder-id`    | ID of the Google Drive folder to save to.                            | **Required**                                                               |
-| `--client-secret`     | Path to `client-secret.json`. Optional if valid token exists.        | `/etc/google-drive-uploader/client-secret.json` to generate the token.json |
-| `--token-path`        | Path to the OAuth 2.0 token file.                                    | `token.json` or `/etc/.../token.json` by drive management                  |
-| `--workdir`           | Path to directory to upload all files from.                          | -                                                                          |
-| `--smart-organize`    | Enable automatic folder organization (`Service/Date/File`).          | `false`                                                                    |
-| `--delete-on-success` | Delete local file after successful upload.                           | `false`                                                                    |
-| `--delete-on-done`    | Delete local file after upload attempt (even on failure).            | `false`                                                                    |
-| `--folder-name`       | Sub-folder name to use/create.                                       | -                                                                          |
-| `--file-name`         | Name to save the file as on Drive.                                   | Local filename                                                             |
-| `--cleanup`           | Enable cleanup mode to remove old date-based folders.                | `false`                                                                    |
-| `--keep`              | Number of most recent date folders to keep (cleanup mode).           | `1`                                                                        |
-| `--match`             | Date pattern to match folder names (e.g., `yyyy-MM-dd`, `yyyyMMdd`). | `yyyy-MM-dd`                                                               |
+| Flag                  | Description                                                          | Default                                                 |
+|-----------------------|----------------------------------------------------------------------|---------------------------------------------------------|
+| `--root-folder-id`    | ID of the Google Drive folder to save to.                            | **Required**                                            |
+| `--client-secret`     | Path to `client-secret.json`. Required only to generate a new token. | `/etc/google-drive-uploader/client-secret.json`         |
+| `--token-path`        | Path to the OAuth 2.0 token file.                                    | `token.json` or `/etc/google-drive-uploader/token.json` |
+| `--workdir`           | Path to directory to upload all files from.                          | -                                                       |
+| `--smart-organize`    | Enable automatic folder organization (`Service/Date/File`).          | `false`                                                 |
+| `--delete-on-success` | Delete local file after successful upload.                           | `false`                                                 |
+| `--delete-on-done`    | Delete local file after upload attempt (even on failure).            | `false`                                                 |
+| `--folder-name`       | Sub-folder name to use/create.                                       | -                                                       |
+| `--file-name`         | Name to save the file as on Drive.                                   | Local filename                                          |
+| `--cleanup`           | Enable cleanup mode to remove old date-based folders.                | `false`                                                 |
+| `--keep`              | Number of most recent date folders to keep (cleanup mode).           | `1`                                                     |
+| `--match`             | Date pattern to match folder names (e.g., `yyyy-MM-dd`, `yyyyMMdd`). | `yyyy-MM-dd`                                            |
