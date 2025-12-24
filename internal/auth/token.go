@@ -11,7 +11,7 @@ import (
 )
 
 // TokenFile represents the enhanced token format with embedded client credentials
-// This allows token refresh without requiring the api-key.json file
+// This allows token refresh without requiring the client-secret.json file
 type TokenFile struct {
 	AccessToken  string    `json:"access_token"`
 	TokenType    string    `json:"token_type"`

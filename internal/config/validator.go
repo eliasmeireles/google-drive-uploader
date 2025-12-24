@@ -8,7 +8,7 @@ import (
 
 const (
 	defaultConfigDir       = "/etc/google-drive-uploader"
-	defaultCredentialsFile = "api-key.json"
+	defaultCredentialsFile = "client-secret.json"
 	defaultTokenFile       = "token.json"
 )
 

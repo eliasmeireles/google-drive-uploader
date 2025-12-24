@@ -10,8 +10,8 @@ func TestConfig_Validate(t *testing.T) {
 	// Create a temporary directory for test files
 	tempDir := t.TempDir()
 
-	// Create dummy api-key.json and token.json
-	apiKeyPath := filepath.Join(tempDir, "api-key.json")
+	// Create dummy client-secret.json and token.json
+	apiKeyPath := filepath.Join(tempDir, "client-secret.json")
 	os.WriteFile(apiKeyPath, []byte("{}"), 0600)
 	tokenPath := filepath.Join(tempDir, "token.json")
 	os.WriteFile(tokenPath, []byte("{}"), 0600)
