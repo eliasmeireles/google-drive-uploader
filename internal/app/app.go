@@ -24,7 +24,7 @@ func Run(cfg config.Config, args []string) error {
 	}
 
 	// 2. Authentication
-	authenticator := auth.NewAuthenticator(cfg.ClientSecret, cfg.TokenPath)
+	authenticator := auth.NewAuthenticator(cfg)
 	client, err := authenticator.GetClient(ctx)
 	if err != nil {
 		return fmt.Errorf("authentication failed: %w", err)

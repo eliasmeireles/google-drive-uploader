@@ -8,19 +8,19 @@ import (
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+
+	"github.com/eliasferreira/google-drive-uploader/internal/config"
 )
 
 // Authenticator handles the OAuth2 authentication process
 type Authenticator struct {
-	ClientSecretPath string
-	TokenPath        string
+	Config config.Config
 }
 
 // NewAuthenticator creates a new Authenticator
-func NewAuthenticator(clientSecretPath, tokenPath string) *Authenticator {
+func NewAuthenticator(config config.Config) *Authenticator {
 	return &Authenticator{
-		ClientSecretPath: clientSecretPath,
-		TokenPath:        tokenPath,
+		Config: config,
 	}
 }
 
@@ -32,11 +32,14 @@ func (a *Authenticator) GetClient(ctx context.Context, scope ...string) (*http.C
 	}
 
 	// Check if we have a valid token first
-	tok, tokenFile, err := tokenFromFile(a.TokenPath)
-	if err == nil && tok.Valid() {
+	tok, tokenFile, err := tokenFromFile(a.Config.TokenPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !a.Config.TokenGen {
 		// We have a valid token, check if it has embedded client credentials
 		var config *oauth2.Config
-
 		// If token has embedded credentials, use them (self-sufficient token)
 		if tokenFile.ClientID != "" && tokenFile.ClientSecret != "" {
 			config = &oauth2.Config{
@@ -45,36 +48,17 @@ func (a *Authenticator) GetClient(ctx context.Context, scope ...string) (*http.C
 				Scopes:       scope,
 				Endpoint:     google.Endpoint,
 			}
-			fmt.Println("Using embedded client credentials from token file")
-		} else {
-			// No embedded credentials, try to load from ClientSecretPath
-			config = &oauth2.Config{
-				Scopes:   scope,
-				Endpoint: google.Endpoint,
-			}
-			// If we have ClientSecretPath, use it to get the full config for refresh capability
-			if a.ClientSecretPath != "" {
-				b, err := os.ReadFile(a.ClientSecretPath)
-				if err == nil {
-					config, err = google.ConfigFromJSON(b, scope...)
-					if err != nil {
-						// If parsing fails, continue with minimal config
-						fmt.Printf("Warning: Could not parse client config, token refresh may not work: %v\n", err)
-					}
-				}
-			}
+			client := a.getClient(ctx, config, tok)
+			return client, nil
 		}
-
-		client := a.getClient(ctx, config, tok)
-		return client, nil
 	}
 
 	// No valid token, we need the client config to authenticate
-	if a.ClientSecretPath == "" {
+	if a.Config.ClientSecret == "" {
 		return nil, fmt.Errorf("no valid token found and --client-secret not provided")
 	}
 
-	b, err := os.ReadFile(a.ClientSecretPath)
+	b, err := os.ReadFile(a.Config.ClientSecret)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read client secret file: %v", err)
 	}
@@ -95,11 +79,11 @@ func (a *Authenticator) getClient(ctx context.Context, config *oauth2.Config, ex
 	if existingToken != nil {
 		tok = existingToken
 	} else {
-		t, _, err := tokenFromFile(a.TokenPath)
+		t, _, err := tokenFromFile(a.Config.TokenPath)
 		if err != nil {
-			fmt.Printf("No token found at %s, starting authorization flow...\n", a.TokenPath)
+			fmt.Printf("No token found at %s, starting authorization flow...\n", a.Config.TokenPath)
 			tok = getTokenFromWeb(config)
-			saveToken(a.TokenPath, tok, config)
+			saveToken(a.Config.TokenPath, tok, config)
 		} else {
 			tok = t
 		}
@@ -109,7 +93,7 @@ func (a *Authenticator) getClient(ctx context.Context, config *oauth2.Config, ex
 	ts := config.TokenSource(ctx, tok)
 	wrappedTs := &savingTokenSource{
 		source: ts,
-		path:   a.TokenPath,
+		path:   a.Config.TokenPath,
 		config: config,
 	}
 
@@ -119,7 +103,7 @@ func (a *Authenticator) getClient(ctx context.Context, config *oauth2.Config, ex
 	if err != nil {
 		fmt.Printf("Failed to refresh token: %v. Requesting new authorization...\n", err)
 		tok = getTokenFromWeb(config)
-		saveToken(a.TokenPath, tok, config)
+		saveToken(a.Config.TokenPath, tok, config)
 		// Update the wrapped source with the new token
 		ts = config.TokenSource(ctx, tok)
 		wrappedTs.source = ts
