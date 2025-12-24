@@ -27,13 +27,13 @@ build-docker-test:
 	@echo "Building docker image for testing..."
 	@docker build -f Dockerfile.test -t google-driver-uploader:test .
 
-test-docker: build-docker-test
+test-docker:
 	@echo "Testing docker image with smart organization"; \
 	read -p "Enter the root folder ID: " ROOT_FOLDER_ID; \
 	docker run --rm \
 		-v $(PWD)/.out:/etc/google-driver-uploader \
 		-v $(PWD)/test:/data \
-		google-driver-uploader:test \
+		ghcr.io/eliasmeireles/cli/google-driver-uploader:latest \
 		--smart-organize \
 		--root-folder-id "$$ROOT_FOLDER_ID" \
 		--folder-name GDU_CLI_TEST_DOCKER \
@@ -46,4 +46,3 @@ debug-docker: build-docker-test
 		-v $(PWD)/test:/data \
 		--entrypoint sh \
 		google-driver-uploader:test
-

@@ -216,8 +216,8 @@ You can also run the uploader directly using Docker. This is useful for testing 
 
 ```bash
 docker run --rm \
-  -v /etc/google-driver-uploader:/etc/google-driver-uploader:ro \
-  -v $(pwd)/data:/data \
+  -v /path/to/token.json:/etc/google-driver-uploader/token.json:ro \
+  -v /path/to/data:/data \
   ghcr.io/eliasmeireles/cli/google-driver-uploader:latest \
   --workdir /data \
   --root-folder-id "YOUR_FOLDER_ID" \
