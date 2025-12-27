@@ -99,8 +99,11 @@ func TestSaveToken(t *testing.T) {
 		ClientSecret: "client-secret",
 	}
 
+	tokenData := NewTokenFile(config.ClientID, config.ClientSecret)
+	tokenData.Refresh(token)
+
 	// Save with config (enhanced)
-	saveToken(tokenPath, token, nil, config)
+	saveToken(tokenPath, tokenData)
 
 	// Read back
 	_, tokenFile, err := tokenFromFile(tokenPath)

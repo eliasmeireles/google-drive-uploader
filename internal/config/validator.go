@@ -21,7 +21,7 @@ var (
 func (c *Config) Validate(args []string) error {
 	// Handle token generation mode validation
 	if c.TokenGen {
-		if _, err := os.Stat(DefaultCredentialsFilesPath); err != nil {
+		if _, err := os.Stat(c.ClientSecret); err != nil {
 			return err
 		}
 		return nil

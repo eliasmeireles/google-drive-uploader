@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestConfig_Validate(t *testing.T) {
+func TestConfig_Validate_Upload(t *testing.T) {
 	// Create a temporary directory for test files
 	tempDir := t.TempDir()
 
@@ -88,23 +88,6 @@ func TestConfig_Validate(t *testing.T) {
 			args:    []string{},
 			wantErr: true,
 		},
-		{
-			name: "Valid token-gen config",
-			config: Config{
-				TokenGen:     true,
-				ClientSecret: apiKeyPath,
-			},
-			args:    []string{},
-			wantErr: false,
-		},
-		{
-			name: "Token-gen missing client secret",
-			config: Config{
-				TokenGen: true,
-			},
-			args:    []string{},
-			wantErr: true,
-		},
 	}
 
 	for _, tt := range tests {
@@ -114,4 +97,37 @@ func TestConfig_Validate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestConfig_Validate_TokenGen(t *testing.T) {
+	// Create a temporary directory for test files
+	tempDir := t.TempDir()
+
+	// Create dummy client-secret.json
+	apiKeyPath := filepath.Join(tempDir, "client-secret.json")
+	os.WriteFile(apiKeyPath, []byte("{}"), 0600)
+
+	t.Run("Valid token-gen config", func(t *testing.T) {
+		config := Config{
+			TokenGen:     true,
+			ClientSecret: apiKeyPath,
+		}
+
+		if err := config.Validate([]string{}); err != nil {
+			t.Errorf("Config.Validate() error = %v, want nil", err)
+		}
+	})
+
+	t.Run("Token-gen missing client secret", func(t *testing.T) {
+		// Temporarily point to non-existent file
+		nonExistentPath := filepath.Join(tempDir, "missing.json")
+
+		config := Config{
+			TokenGen:     true,
+			ClientSecret: nonExistentPath,
+		}
+		if err := config.Validate([]string{}); err == nil {
+			t.Error("Config.Validate() error = nil, want error")
+		}
+	})
 }
