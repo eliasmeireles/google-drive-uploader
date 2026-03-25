@@ -1,8 +1,10 @@
 package parser
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseFilename(t *testing.T) {
@@ -49,6 +51,24 @@ func TestParseFilename(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:     "Underscore Service Name YYYYMMDD",
+			filename: "app_service_data_backup_20260324_164627.tar.gz",
+			want: &Metadata{
+				Service: "APP_SERVICE_DATA",
+				Date:    "2026-03-24",
+			},
+			wantErr: false,
+		},
+		{
+			name:     "Underscore Service Name YYYY-MM-DD",
+			filename: "order_items_backup_2025-12-24_084205.tar.gz",
+			want: &Metadata{
+				Service: "ORDER_ITEMS",
+				Date:    "2025-12-24",
+			},
+			wantErr: false,
+		},
+		{
 			name:     "Invalid Pattern",
 			filename: "random_file.txt",
 			want:     nil,
@@ -65,13 +85,12 @@ func TestParseFilename(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := ParseFilename(tt.filename)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseFilename() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				require.Error(t, err)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseFilename() = %v, want %v", got, tt.want)
-			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -88,8 +107,6 @@ func TestCamelToSnakeCase(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		if got := camelToSnakeCase(tt.input); got != tt.want {
-			t.Errorf("camelToSnakeCase(%q) = %q, want %q", tt.input, got, tt.want)
-		}
+		assert.Equal(t, tt.want, camelToSnakeCase(tt.input))
 	}
 }

@@ -18,12 +18,12 @@ type Metadata struct {
 // Valid Date formats: YYYYMMDD or YYYY-MM-DD
 func ParseFilename(filename string) (*Metadata, error) {
 	// Pattern explanation:
-	// ^(?P<service>[a-zA-Z0-9]+)  : Start with alphanumeric service name
+	// ^(?P<service>.+)            : Service name (may contain underscores, e.g. app_service_data)
 	// _backup_                    : Literal separator
 	// (?P<date>\d{8}|\d{4}-\d{2}-\d{2}) : Date as 8 digits OR YYYY-MM-DD
 	// _                           : Helper separator before time (time not strictly needed for folder but confirms pattern)
 	// .*                          : Rest of the file
-	re := regexp.MustCompile(`^(?P<service>[a-zA-Z0-9]+)_backup_(?P<date>\d{8}|\d{4}-\d{2}-\d{2})_.*`)
+	re := regexp.MustCompile(`^(?P<service>.+)_backup_(?P<date>\d{8}|\d{4}-\d{2}-\d{2})_.*`)
 
 	matches := re.FindStringSubmatch(filename)
 	if matches == nil {
