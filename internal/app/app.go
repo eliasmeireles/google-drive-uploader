@@ -123,9 +123,9 @@ func processFile(ctx context.Context, svc *driveclient.DriveService, cfg config.
 	// Handle Directory Logic
 	parentID := cfg.RootFolderID
 
-	// 1. Explicit Folder Name
+	// 1. Explicit Folder Name (supports nested paths, e.g. "ORACLE-VPS-01/MONGODB")
 	if cfg.FolderName != "" {
-		id, err := svc.FindOrCreateFolder(ctx, cfg.FolderName, parentID)
+		id, err := ResolveFolderPath(ctx, svc, cfg.FolderName, parentID)
 		if err != nil {
 			log.Printf("Failed to find or create folder '%s': %v. Skipping file.", cfg.FolderName, err)
 			return
