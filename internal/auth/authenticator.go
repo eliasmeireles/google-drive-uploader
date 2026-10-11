@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,6 +12,10 @@ import (
 
 	"github.com/eliasferreira/google-drive-uploader/internal/config"
 )
+
+// ErrTokenRefreshFailed is returned when the stored token cannot be refreshed and no terminal
+// is available to run the interactive authorization flow.
+var ErrTokenRefreshFailed = errors.New("token expired or revoked and no terminal is available for re-authorization")
 
 // Authenticator handles the OAuth2 authentication process
 type Authenticator struct {
@@ -48,8 +53,7 @@ func (a *Authenticator) GetClient(ctx context.Context, scope ...string) (*http.C
 				Scopes:       scope,
 				Endpoint:     google.Endpoint,
 			}
-			client := a.getClient(ctx, config, tok)
-			return client, nil
+			return a.getClient(ctx, config, tok)
 		}
 	}
 
@@ -68,12 +72,16 @@ func (a *Authenticator) GetClient(ctx context.Context, scope ...string) (*http.C
 		return nil, fmt.Errorf("unable to parse client secret file to config: %v", err)
 	}
 
-	client := a.getClient(ctx, config, nil)
-	return client, nil
+	return a.getClient(ctx, config, nil)
 }
 
 // getClient retrieves a token, saves the token, then returns the generated client.
-func (a *Authenticator) getClient(ctx context.Context, config *oauth2.Config, existingToken *oauth2.Token) *http.Client {
+//
+// When the stored token can no longer be refreshed (expired or revoked), it falls back to the
+// interactive browser flow only if a terminal is attached or --token-gen was requested. In
+// unattended runs (cron jobs, containers) it returns an error instead of waiting for input
+// that will never arrive.
+func (a *Authenticator) getClient(ctx context.Context, config *oauth2.Config, existingToken *oauth2.Token) (*http.Client, error) {
 	var tok *oauth2.Token
 
 	if existingToken != nil {
@@ -102,6 +110,9 @@ func (a *Authenticator) getClient(ctx context.Context, config *oauth2.Config, ex
 	// This ensures we have a valid token before we start any operation
 	initialTok, err := wrappedTs.Token()
 	if err != nil {
+		if !a.Config.TokenGen && !stdinIsTerminal() {
+			return nil, fmt.Errorf("%w (regenerate it with --token-gen): %v", ErrTokenRefreshFailed, err)
+		}
 		fmt.Printf("Failed to refresh token: %v. Requesting new authorization...\n", err)
 		tok = getTokenFromWeb(config)
 		tokenData := NewTokenFile(config.ClientID, config.ClientSecret)
@@ -112,5 +123,5 @@ func (a *Authenticator) getClient(ctx context.Context, config *oauth2.Config, ex
 		initialTok = tok
 	}
 
-	return oauth2.NewClient(ctx, oauth2.ReuseTokenSource(initialTok, wrappedTs))
+	return oauth2.NewClient(ctx, oauth2.ReuseTokenSource(initialTok, wrappedTs)), nil
 }
