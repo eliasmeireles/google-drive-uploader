@@ -32,8 +32,13 @@ func NewDriveService(ctx context.Context, client *http.Client) (*DriveService, e
 	return &DriveService{srv: srv}, nil
 }
 
+// uploadResponseFields lists the metadata returned after an upload. The Drive
+// API omits size from its default response, so it must be requested explicitly.
+const uploadResponseFields = "id, name, size"
+
 // UploadFile uploads a file to Google Drive.
 // It uses Resumable Uploads which is good for large files.
+// The returned file carries the stored size as reported by Drive.
 func (s *DriveService) UploadFile(ctx context.Context, file io.Reader, filename string, parentID string) (*drive.File, error) {
 	f := &drive.File{
 		Name:    filename,
@@ -42,7 +47,7 @@ func (s *DriveService) UploadFile(ctx context.Context, file io.Reader, filename 
 
 	// We can add Progress reporting if needed by wrapping the reader,
 	// but for now we stick to the basic resumable upload.
-	res, err := s.srv.Files.Create(f).Media(file).Do()
+	res, err := s.srv.Files.Create(f).Media(file).Fields(uploadResponseFields).Context(ctx).Do()
 	if err != nil {
 		return nil, fmt.Errorf("could not upload file: %v", err)
 	}
